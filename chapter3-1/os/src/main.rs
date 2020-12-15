@@ -46,7 +46,7 @@ fn clear_bss() {
 pub extern "C" fn rust_main() -> ! {
     clear_bss();
     trap::init();
-    process::next_app(0);
+    process::next_app(0,0);
 }
 
 

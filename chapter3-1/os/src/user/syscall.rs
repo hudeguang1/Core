@@ -11,9 +11,9 @@ pub fn syscall(id: usize, args: [usize; 3]) -> usize{
     ret
 }
 
-const SYSCALL_WRITE: usize = 64;
-const SYSCALL_EXIT: usize = 93;
-const SYSCALL_YIELD: usize = 124;
+pub const SYSCALL_WRITE: usize = 64;
+pub const SYSCALL_EXIT: usize = 93;
+pub const SYSCALL_YIELD: usize = 124;
 
 pub fn sys_write(fd: usize, buf: &[u8]) -> usize {
     syscall(SYSCALL_WRITE, [ fd, buf.as_ptr() as usize, buf.len() ])

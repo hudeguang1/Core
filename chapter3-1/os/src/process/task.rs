@@ -7,7 +7,7 @@ pub struct Process {
 }
 #[derive(Copy, Clone, PartialEq)]
 pub enum TaskStatus {
-    Waiting,
+    Exit,
     Running,
     Ready,
 }

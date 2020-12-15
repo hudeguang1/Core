@@ -10,9 +10,9 @@ pub struct KernelStack{
     data: [u8; KERNEL_STACK_SIZE]
 }
 
-pub static mut KERNEL_STACK: [KernelStack; 2] = [
+pub static mut KERNEL_STACK: [KernelStack; 3] = [
     KernelStack { data: [0; KERNEL_STACK_SIZE], };
-    2
+    3
 ];
 
 impl KernelStack {

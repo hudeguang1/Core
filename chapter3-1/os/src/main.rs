@@ -26,6 +26,7 @@ mod process;
 mod syscall;
 mod user;
 mod scheduler;
+
 // 汇编编写的程序入口，具体见该文件
 global_asm!(include_str!("entry.asm"));
 
@@ -43,10 +44,10 @@ fn clear_bss() {
 
 /// Rust 的入口函数
 #[no_mangle] //告诉编译器对于此函数禁用编译期间的名称重整
-pub extern "C" fn rust_main() -> ! {
+pub extern "C" fn rust_main() {
     clear_bss();
     trap::init();
-    process::next_app(0,0);
+    process::next_app(0);
 }
 
 

@@ -1,8 +1,9 @@
 use crate::syscall::*;
 use super::context::Context;
 use riscv::register::{
-    scause::{Exception, Scause, Trap},
+    scause::{Exception, Interrupt, Scause, Trap},
     stvec,
+    sie,
 };
 
 global_asm!(include_str!("./interrupt.asm"));
@@ -13,8 +14,8 @@ pub fn init() {
             fn __interrupt();
         }
         stvec::write(__interrupt as usize, stvec::TrapMode::Direct);
+        //sie::set_sext();
     }
-    
 }
 
 #[no_mangle]
@@ -33,6 +34,7 @@ fn break_point(context: &mut Context) {
     println!("Breakpoint at 0x{:x}", context.sepc);
     context.sepc += 2;
 }
+
 
 fn user_envcall(context: &mut Context) {
     context.sepc += 4;

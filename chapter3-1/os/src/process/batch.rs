@@ -2,13 +2,15 @@ use super::*;
 use crate::trap::Context;
 use crate::user::*;
 use crate::scheduler::*;
+use crate::trap::*;
 
-pub fn next_app(user_app: usize, sys_id: usize) -> ! {
+pub fn next_app(sys_id: usize) -> ! {
     extern "C" {
         fn __restore(context: usize);
     }
+    
     let context_ptr = SCHEDULER.get_ptr();
-    SCHEDULER.set_status(user_app, sys_id);
+    SCHEDULER.set_status(sys_id);
     if SCHEDULER.get_app_num() == 0 {
         panic!("app end")
     }

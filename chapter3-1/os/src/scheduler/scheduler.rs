@@ -14,6 +14,7 @@ pub struct SchedulerInner {
     pub processes: [Process; 3],
     pub current_process: usize,
     pub num_app: usize,
+    pub preorder: usize,
 }
 
 unsafe impl Sync for Scheduler {}
@@ -37,21 +38,22 @@ lazy_static! {
                 processes,
                 current_process: 0,
                 num_app,
+                preorder: 0,
             }),
         }
     };
 }
 
 impl Scheduler {
-    pub fn set_status(&self, user_app: usize, sys_id: usize){
+    pub fn set_status(&self, sys_id: usize){
+        let mut inner = self.inner.borrow_mut();
+        let user_app = inner.preorder;
         if sys_id == SYSCALL_EXIT {
-            self.inner.borrow_mut().num_app -= 1;
-            self.inner.borrow_mut().processes[user_app].task_status = TaskStatus::Exit;
+            inner.num_app -= 1;
+            inner.processes[user_app].task_status = TaskStatus::Exit;
         } else if sys_id == SYSCALL_YIELD {
-            self.inner.borrow_mut().processes[user_app].task_status = TaskStatus::Ready;
-        } else {
-            self.inner.borrow_mut().processes[user_app].task_status = TaskStatus::Running;
-        }
+            
+        } 
     }
 
     pub fn get_app_num(&self) -> usize {
@@ -63,7 +65,7 @@ impl Scheduler {
         let mut next = 0;
         let current = inner.current_process;
         for i in 0..inner.processes.len() {
-            if inner.processes[i].task_status == TaskStatus:: Ready {
+            if inner.processes[i].task_status == TaskStatus::Ready {
                 next = i;
                 break;
             }
@@ -71,9 +73,11 @@ impl Scheduler {
         if inner.num_app == 1 {
             return inner.processes[current].context_ptr;
         }
-        if next != current {
-            inner.processes[current].task_status = TaskStatus::Ready;
-            inner.current_process = next;
+        if next != current && inner.processes[current].task_status == TaskStatus::Running {
+                inner.processes[current].task_status = TaskStatus::Ready;
+                inner.current_process = next;
+                inner.preorder = current;
+            
         }
         inner.processes[next].task_status = TaskStatus::Running;
         inner.processes[next].context_ptr

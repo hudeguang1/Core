@@ -45,7 +45,7 @@ fn clear_bss() {
 /// Rust 的入口函数
 #[no_mangle] //告诉编译器对于此函数禁用编译期间的名称重整
 pub extern "C" fn rust_main() {
-    clear_bss();
+    //clear_bss();
     trap::init();
     process::next_app(0);
 }

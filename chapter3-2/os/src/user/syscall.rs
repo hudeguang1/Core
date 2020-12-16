@@ -14,6 +14,7 @@ pub fn syscall(id: usize, args: [usize; 3]) -> usize{
 pub const SYSCALL_WRITE: usize = 64;
 pub const SYSCALL_EXIT: usize = 93;
 pub const SYSCALL_YIELD: usize = 124;
+pub const SYSCALL_GET_TIME: usize = 169;
 
 pub fn sys_write(fd: usize, buf: &[u8]) -> usize {
     syscall(SYSCALL_WRITE, [ fd, buf.as_ptr() as usize, buf.len() ])
@@ -25,4 +26,8 @@ pub fn sys_exit(xstate: usize) -> usize {
 
 pub fn sys_yield(c: usize) -> usize {
     syscall(SYSCALL_YIELD,[c, 0, 0])
+}
+
+pub fn sys_get_time() -> usize {
+    syscall(SYSCALL_GET_TIME, [0, 0, 0])
 }

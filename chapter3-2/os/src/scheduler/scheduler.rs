@@ -11,7 +11,7 @@ pub struct Scheduler {
 }
 
 pub struct SchedulerInner {
-    pub processes: [Process; 3],
+    pub processes: [Process; 4],
     pub current_process: usize,
     pub num_app: usize,
     pub preorder: usize,
@@ -20,11 +20,11 @@ pub struct SchedulerInner {
 unsafe impl Sync for Scheduler {}
 lazy_static! {
     pub static ref SCHEDULER: Scheduler = {
-        let app_addr = [write_a as usize, write_b as usize, write_c as usize];
+        let app_addr = [write_a as usize, write_b as usize, write_c as usize, sleep as usize];
         let num_app = app_addr.len();
-        let mut processes: [Process; 3] = [
+        let mut processes: [Process; 4] = [
             Process {context_ptr: 0, task_status: TaskStatus::Ready, };
-            3
+            4
         ];
         
         unsafe {

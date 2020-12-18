@@ -1,0 +1,36 @@
+#![allow(unused)]
+pub fn syscall(id: usize, args: [usize; 3]) -> usize{
+    let mut ret;
+    unsafe {
+        llvm_asm!("ecall"
+            : "={x10}" (ret)
+            : "{x10}" (args[0]), "{x11}" (args[1]), "{x12}" (args[2]),"{x17}" (id)
+            : "memory"
+            : "volatile"
+        );
+    }
+    ret
+}
+
+pub const STDIN: usize = 0;
+pub const STDOUT: usize = 1;
+pub const SYSCALL_WRITE: usize = 64;
+pub const SYSCALL_EXIT: usize = 93;
+pub const SYSCALL_YIELD: usize = 124;
+pub const SYSCALL_GET_TIME: usize = 169;
+
+pub fn sys_write(fd: usize, buf: &[u8]) -> usize {
+    syscall(SYSCALL_WRITE, [ fd, buf.as_ptr() as usize, buf.len() ])
+}
+
+pub fn sys_exit(xstate: isize) -> usize {
+    syscall(SYSCALL_EXIT, [ xstate as usize, 0, 0 ])
+}
+
+pub fn sys_yield() -> usize {
+    syscall(SYSCALL_YIELD,[0, 0, 0])
+}
+
+pub fn sys_get_time() -> usize {
+    syscall(SYSCALL_GET_TIME, [0, 0, 0])
+}

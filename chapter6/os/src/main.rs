@@ -30,6 +30,8 @@ mod syscall;
 //mod user;
 mod loader;
 mod scheduler;
+mod drivers;
+mod fs;
 
 extern crate alloc;
 
@@ -37,6 +39,7 @@ use crate::process::*;
 use crate::loader::*;
 use alloc::sync::Arc;
 use crate::scheduler::*;
+use crate::memory::*;
 // 汇编编写的程序入口，具体见该文件
 global_asm!(include_str!("entry.asm"));
 global_asm!(include_str!("link_app.S"));
@@ -45,9 +48,11 @@ global_asm!(include_str!("link_app.S"));
 
 /// Rust 的入口函数
 #[no_mangle] //告诉编译器对于此函数禁用编译期间的名称重整
-pub extern "C" fn rust_main() {
+pub extern "C" fn rust_main(_hart_id: usize, dtb_pa: PhysicalAddress) {
     memory::init();
     trap::init();
+    drivers::init(dtb_pa);
+    fs::init();
     let process1 = Arc::new(Process::new(get_app_data_by_name("04hello").unwrap()));
     // let process2 = Arc::new(Process::new(get_app_data_by_name("01power_5").unwrap()));
     // let process3 = Arc::new(Process::new(get_app_data_by_name("02power_7").unwrap()));

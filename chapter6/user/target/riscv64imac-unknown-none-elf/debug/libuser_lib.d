@@ -1,0 +1,1 @@
+/home/hdg/Core/chapter6/user/target/riscv64imac-unknown-none-elf/debug/libuser_lib.rlib: /home/hdg/Core/chapter6/user/src/config.rs /home/hdg/Core/chapter6/user/src/console.rs /home/hdg/Core/chapter6/user/src/lib.rs /home/hdg/Core/chapter6/user/src/panic.rs /home/hdg/Core/chapter6/user/src/syscall.rs

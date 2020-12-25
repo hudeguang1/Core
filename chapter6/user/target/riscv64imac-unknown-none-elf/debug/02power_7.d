@@ -1,0 +1,1 @@
+/home/hdg/Core/chapter6/user/target/riscv64imac-unknown-none-elf/debug/02power_7: /home/hdg/Core/chapter6/user/src/bin/02power_7.rs /home/hdg/Core/chapter6/user/src/config.rs /home/hdg/Core/chapter6/user/src/console.rs /home/hdg/Core/chapter6/user/src/lib.rs /home/hdg/Core/chapter6/user/src/panic.rs /home/hdg/Core/chapter6/user/src/syscall.rs

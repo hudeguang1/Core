@@ -1,0 +1,1 @@
+/home/hdg/Core/chapter5/user/target/riscv64imac-unknown-none-elf/release/04hello: /home/hdg/Core/chapter5/user/src/bin/04hello.rs /home/hdg/Core/chapter5/user/src/config.rs /home/hdg/Core/chapter5/user/src/console.rs /home/hdg/Core/chapter5/user/src/lib.rs /home/hdg/Core/chapter5/user/src/panic.rs /home/hdg/Core/chapter5/user/src/syscall.rs

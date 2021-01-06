@@ -27,8 +27,6 @@ mod trap;
 mod memory;
 mod process;
 mod syscall;
-//mod user;
-mod loader;
 mod scheduler;
 mod drivers;
 mod fs;
@@ -36,13 +34,13 @@ mod fs;
 extern crate alloc;
 
 use crate::process::*;
-use crate::loader::*;
 use alloc::sync::Arc;
 use crate::scheduler::*;
 use crate::memory::*;
-// 汇编编写的程序入口，具体见该文件
+use crate::fs::*;
+use xmas_elf::ElfFile;
+
 global_asm!(include_str!("entry.asm"));
-global_asm!(include_str!("link_app.S"));
 
 
 
@@ -53,10 +51,11 @@ pub extern "C" fn rust_main(_hart_id: usize, dtb_pa: PhysicalAddress) {
     trap::init();
     drivers::init(dtb_pa);
     fs::init();
-    let process1 = Arc::new(Process::new(get_app_data_by_name("04hello").unwrap()));
+    // let process1 = Arc::new(Process::new(get_app_data_by_name("04hello").unwrap()));
     // let process2 = Arc::new(Process::new(get_app_data_by_name("01power_5").unwrap()));
     // let process3 = Arc::new(Process::new(get_app_data_by_name("02power_7").unwrap()));
-    // let process4 = Arc::new(Process::new(get_app_data_by_name("03sleep").unwrap(), 3));
+    // let process4 = Arc::new(Process::new(get_app_data_by_name("03sleep").unwrap()));
+    let process1 = Arc::new(create_user_process("pipetest"));
 
     SCHEDULER.lock().add_process(process1);
     // SCHEDULER.lock().add_process(process2);
@@ -65,7 +64,17 @@ pub extern "C" fn rust_main(_hart_id: usize, dtb_pa: PhysicalAddress) {
 
     process::next_app(0);
 
-    panic!("end of rustmain")
 }
 
-
+/// 创建一个用户进程，从指定的文件名读取 ELF
+pub fn create_user_process(name: &str) -> Process {
+    // 从文件系统中找到程序
+    let app = ROOT_INODE.find(name).unwrap();
+    // 读取数据
+    let data = app.readall().unwrap();
+    // 解析 ELF 文件
+    let elf = ElfFile::new(data.as_slice()).unwrap();
+    // 利用 ELF 文件创建进程，映射空间并加载数据
+    let process = Process::new(&elf, true);
+    process
+}

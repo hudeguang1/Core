@@ -1,5 +1,4 @@
 use crate::scheduler::*;
-use crate::process::*;
 
 pub fn sys_wait(pid: isize) -> isize {
     let children = SCHEDULER.lock().current().inner.lock().children.clone();

@@ -33,6 +33,12 @@ impl MemorySet {
 
         // 建立字段
         let segments = vec![
+            // DEVICE 段，rw-
+            Segment {
+                map_type: MapType::Linear,
+                range: Range::from(DEVICE_START_ADDRESS..DEVICE_END_ADDRESS),
+                flags: Flags::READABLE | Flags::WRITABLE,
+            },
             // .text 段，r-x
             Segment {
                 map_type: MapType::Linear,
@@ -116,10 +122,10 @@ impl MemorySet {
         false
     }
 
-    pub fn from_elf(elf_data: &[u8]) -> (Self, usize) {
+    pub fn from_elf(file: &ElfFile, is_user: bool) -> (Self, usize) {
         // 建立带有内核映射的 MemorySet
         let mut memory_set = MemorySet::new_kernel().unwrap();
-        let file = ElfFile::new(elf_data).unwrap();
+        //let file = ElfFile::new(elf_data).unwrap();
         // 遍历 elf 文件的所有部分
         for program_header in file.program_iter() {
             if program_header.get_type() != Ok(Type::Load) {
@@ -139,7 +145,7 @@ impl MemorySet {
             let segment = Segment {
                 map_type: MapType::Framed,
                 range: Range::from(start..(start + size)),
-                flags: Flags::user(true)
+                flags: Flags::user(is_user)
                     | Flags::readable(program_header.flags().is_read())
                     | Flags::writable(program_header.flags().is_write())
                     | Flags::executable(program_header.flags().is_execute()),
@@ -165,7 +171,7 @@ impl MemorySet {
                 flags: flags | Flags::user(true),
             }, 
             None,
-        );
+        ).unwrap();
         Range::from(range.start..(range.start + size))
     }
 

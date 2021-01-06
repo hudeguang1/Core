@@ -15,6 +15,8 @@ pub fn syscall(id: usize, args: [usize; 3]) -> isize{
 pub const STDIN: usize = 0;
 pub const STDOUT: usize = 1;
 
+pub const SYSCALL_CLOSE: usize = 57;
+pub const SYSCALL_PIPE: usize = 59;
 pub const SYSCALL_READ: usize = 63;
 pub const SYSCALL_WRITE: usize = 64;
 pub const SYSCALL_EXIT: usize = 93;
@@ -30,7 +32,15 @@ pub fn sys_write(fd: usize, buf: &[u8]) -> isize {
 }
 
 pub fn sys_read(fd: usize, buf: &mut [u8]) -> isize {
-    syscall(SYSCALL_READ, [ fd, buf.as_mut_ptr() as usize, buf.len() ])
+    loop {
+        let ret = syscall(
+            SYSCALL_READ,
+            [ fd, buf as *const [u8] as *const u8 as usize, buf.len() ],
+        );
+        if ret >= 0 {
+            return ret;
+        }
+    }
 }
 
 pub fn sys_exit(xstate: isize) -> isize {
@@ -38,7 +48,6 @@ pub fn sys_exit(xstate: isize) -> isize {
 }
 
 pub fn sys_yield() -> isize {
-    println!("user sys_yeild");
     syscall(SYSCALL_YIELD,[0, 0, 0])
 }
 
@@ -60,4 +69,12 @@ pub fn sys_getpid() -> isize {
 
 pub fn sys_wait(pid: isize) -> isize {
     syscall(SYSCALL_WAITPID, [pid as usize, 0, 0])
+}
+
+pub fn sys_pipe(fd: *mut usize) -> isize {
+    syscall(SYSCALL_PIPE, [fd as usize, 0, 0])
+}
+
+pub fn sys_close(fd: usize) -> isize {
+    syscall(SYSCALL_CLOSE, [fd, 0, 0])
 }

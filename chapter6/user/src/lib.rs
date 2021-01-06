@@ -54,3 +54,9 @@ pub extern "C" fn abort() {
 fn oom(_: Layout) -> ! {
     panic!("out of memory");
 }
+
+pub fn pipe() -> (usize, usize) {
+    let mut fd: [usize; 2] = [0; 2];
+    sys_pipe(&mut fd as *mut [usize] as *mut usize);
+    (fd[0], fd[1])
+}

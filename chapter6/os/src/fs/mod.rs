@@ -16,12 +16,14 @@ mod config;
 mod inode_ext;
 mod stdin;
 mod stdout;
+mod pipe;
 
 pub use config::*;
 pub use inode_ext::INodeExt;
 pub use rcore_fs::{dev::block_cache::BlockCache, vfs::*};
 pub use stdin::STDIN;
 pub use stdout::STDOUT;
+pub use pipe::*;
 
 lazy_static! {
     /// 根文件系统的根目录的 INode
@@ -43,6 +45,6 @@ lazy_static! {
 
 /// 触发 [`static@ROOT_INODE`] 的初始化并打印根目录内容
 pub fn init() {
-    ROOT_INODE.ls();
+    //ROOT_INODE.ls();
     println!("mod fs initialized");
 }

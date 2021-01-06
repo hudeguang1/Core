@@ -20,6 +20,7 @@ lazy_static! {
     pub static ref SCHEDULER: Lock<Scheduler> = Lock::new(Scheduler::new());
 }
 
+#[allow(unused)]
 impl Scheduler {
     pub fn new() -> Self {
         Scheduler {

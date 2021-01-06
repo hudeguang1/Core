@@ -52,6 +52,7 @@ impl INode for Stdin {
     }
 }
 
+#[allow(unused)]
 impl Stdin {
     /// 向缓冲区插入一个字符，然后唤起一个线程
     pub fn push(&self, c: u8) {

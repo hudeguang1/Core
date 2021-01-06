@@ -3,7 +3,6 @@
 
 #[macro_use]
 extern crate user_lib;
-use user_lib::{sys_fork};
 
 const LEN: usize = 100;
 

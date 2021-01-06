@@ -2,10 +2,11 @@ use crate::memory::*;
 use super::*;
 use crate::memory::mapping::*;
 use crate::trap::*;
-use alloc::sync::Arc;
-use alloc::vec::*;
+use alloc::{sync::Arc, vec, vec::Vec};
 use spin::Mutex;
 use core::mem::size_of;
+use xmas_elf::ElfFile;
+use crate::fs::*;
 
 pub struct Process {
     pub pid: isize,
@@ -19,6 +20,7 @@ pub struct ProcessInner {
     pub memory_set: MemorySet,
     pub is_user: bool,
     pub children: Vec<isize>,
+    pub descriptors: Vec<Arc<dyn INode>>
 }
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum TaskStatus {
@@ -39,11 +41,11 @@ impl PartialEq for Process {
 impl Eq for Process {}
 
 impl Process {
-    pub fn new(elf_data: &[u8]) -> Self {
-        let (mut memory_set, entry_point) = MemorySet::from_elf(elf_data);
+    pub fn new(file: &ElfFile, is_user: bool) -> Self {
+        let (mut memory_set, entry_point) = MemorySet::from_elf(file, is_user);
         let stack = memory_set.alloc_page_range(USER_STACK_SIZE, Flags::READABLE | Flags::WRITABLE);
         let context = Context::new(stack.end.into(), entry_point, true);
-        let mut context_ptr = 0;;
+        let context_ptr;
         unsafe {
             context_ptr = KERNEL_STACK[PROCESS_COUNTER as usize].push_context(context) as * const _ as usize
         }
@@ -59,6 +61,7 @@ impl Process {
                 memory_set,
                 is_user: true,
                 children: Vec::new(),
+                descriptors: vec![STDIN.clone(), STDOUT.clone()],
             }),  
         }
     }
@@ -93,7 +96,7 @@ impl Process {
             PROCESS_COUNTER += 1;
             PROCESS_COUNTER
         };
-        let mut context_ptr = 0;
+        let context_ptr;
         unsafe {
             for i in 0..KERNEL_STACK_SIZE {
                 KERNEL_STACK[(pid) as usize].data[i] = KERNEL_STACK[(self.pid) as usize].data[i];
@@ -111,14 +114,15 @@ impl Process {
                 memory_set,
                 is_user,
                 children: Vec::new(),
+                descriptors: self.get_lock().descriptors.clone(),
             }),
         });
         self.inner.lock().children.push(pid);
         process
     }
 
-    pub fn exec(&self, elf_data: &[u8]) {
-        let (mut memory_set, entry_point) = MemorySet::from_elf(elf_data);
+    pub fn exec(&self, file: &ElfFile) {
+        let (mut memory_set, entry_point) = MemorySet::from_elf(file, true);
         let stack = memory_set.alloc_page_range(USER_STACK_SIZE, Flags::READABLE | Flags::WRITABLE);
         let context = Context::new(stack.end.into(), entry_point, true);
         self.inner.lock().context_ptr = unsafe {
@@ -128,6 +132,11 @@ impl Process {
         self.inner.lock().stack = stack;
         self.inner.lock().memory_set = memory_set;
         self.inner.lock().children = Vec::new();
+    }
+
+    /// 上锁并获得可变部分的引用
+    pub fn get_lock(&self) -> spin::MutexGuard<ProcessInner> {
+        self.inner.lock()
     }
 }
 

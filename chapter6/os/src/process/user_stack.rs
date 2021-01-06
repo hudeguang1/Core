@@ -14,6 +14,7 @@ pub static mut USER_STACK: [UserStack; APP_NUM] = [
     APP_NUM
 ];
 
+#[allow(unused)]
 impl UserStack {
     pub fn get_sp(&self) -> usize {
         self.data.as_ptr() as usize + USER_STACK_SIZE

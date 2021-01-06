@@ -1,27 +1,21 @@
-use crate::process::next_app;
-use super::SYSCALL_YIELD;
-use crate::sbi::*;
 
-pub const STDIN: usize = 0;
-pub const STDOUT: usize = 1;
+use crate::scheduler::*;
+use core::slice::from_raw_parts_mut;
 
-pub fn sys_read(fd: usize, buf: *const u8, len: usize) -> isize {
-    if fd == STDIN {
-        let mut c = 0;
-        loop {
-            c = console_getchar();
-            if c == 0 {
-                next_app(SYSCALL_YIELD);
-            } else {
-                break;
+// pub const STDIN: usize = 0;
+
+pub fn sys_read(fd: usize, buf: *mut u8, len: usize) -> isize {
+    let process = SCHEDULER.lock().current();
+    if let Some(inode) = process.get_lock().descriptors.get(fd) {
+        // 从系统调用传入的参数生成缓冲区
+        let buffer = unsafe { from_raw_parts_mut(buf, len) };
+        // 尝试读取
+        if let Ok(ret) = inode.read_at(0, buffer) {
+            let ret = ret as isize;
+            if ret > 0 {
+                return ret;
             }
         }
-
-        let ptr = buf as *mut u8;
-
-        let ch = c as u8;
-        let slice = unsafe { core::slice::from_raw_parts_mut(ptr, len) };
-        unsafe { slice.as_mut_ptr().write_volatile(ch); }
     }
-    1
+    -1
 }

@@ -29,7 +29,7 @@ pub fn main() -> i32 {
         println!("{}", res);
     } else {
         println!("parent");
-        sys_close(read_fd);
+        //sys_close(read_fd);
         sys_write(write_fd, b"hello_world");
     }
     0

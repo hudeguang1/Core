@@ -13,6 +13,5 @@ pub fn sys_pipe(pipe: *mut usize) -> isize {
     let fd = unsafe { from_raw_parts_mut(pipe, 2) };
     fd[0] = readfd as usize;
     fd[1] = writefd as usize;
-    println!("{}/{}", fd[0], fd[1]);
     0
 }

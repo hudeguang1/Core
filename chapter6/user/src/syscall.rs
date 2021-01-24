@@ -37,7 +37,7 @@ pub fn sys_read(fd: usize, buf: &mut [u8]) -> isize {
             SYSCALL_READ,
             [ fd, buf as *const [u8] as *const u8 as usize, buf.len() ],
         );
-        if ret >= 0 {
+        if ret > 0 {
             return ret;
         }
     }
